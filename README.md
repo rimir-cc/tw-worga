@@ -14,16 +14,16 @@ The plugin is intentionally small. It demonstrates the integration pattern; brin
 ## Prerequisites
 
 - TiddlyWiki ≥ 5.4.0
-- [`rimir/cascade-palette`](https://github.com/rimir-cc/tw-cascade-palette) ≥ 0.0.97 — provides sticky-context, the `ca-view-after-fire: stay` view-level keep-open default (0.0.96), and ambient `<<sticky-context-list>>` in every `_filterInScope` (0.0.97). Without 0.0.97, the ☑/☐ row icon in Pick attendees always shows ☐ regardless of pin state.
+- [`rimir/cascade-palette`](https://github.com/rimir-cc/tw-cascade-palette) ≥ 0.0.98 — provides sticky-context, the `ca-view-after-fire: stay` view-level keep-open default (0.0.96), ambient `<<sticky-context-list>>` in every `_filterInScope` (0.0.97), and the view-history back-stack so Esc out of `m`-driven or take-call-driven views returns to where you were (0.0.98). Without 0.0.97, the ☑/☐ row icon in Pick attendees always shows ☐ regardless of pin state; without 0.0.98, Esc closes the palette instead of returning to the previous view.
 - [`rimir/kind`](https://github.com/rimir-cc/tw-kind) is optional — when installed, verbs route via `kind.type`; otherwise they fall back to tag-based matching.
 
 ## Quick start
 
-1. Install `rimir/cascade-palette` 0.0.97+ and this plugin. Restart.
+1. Install `rimir/cascade-palette` 0.0.98+ and this plugin. Restart.
 2. Open the palette (Ctrl-Space). The Context pill strip is empty.
-3. On any person row, Space → *Take call from this person*. Sticky context is cleared, the person is pinned, palette jumps to *Topics for context*.
-4. Switch back to your usual view at any time — the Context strip still shows the pinned person until you clear it (Shift-`C` leader) or unpin (Backspace on the pill).
-5. For a multi-person meeting, type `m` (leader) → *Pick attendees* view opens. Enter on each attendee toggles in/out of context; view stays open; ☑/☐ updates live; pinned rows float to the top. Esc closes the picker.
+3. On any person row, Space → *Take call from this person*. Sticky context is cleared, the person is pinned, palette jumps to *Topics for context*. Press **Esc** to return to the view you were in when you fired the verb — the pinned person stays in context (only the view-jump unwinds).
+4. Manually switching views (view-pill click / Enter) clears the back-stack — you've taken over navigation. The Context strip still shows the pinned person until you clear it (Shift-`C` leader) or unpin (Backspace on the pill).
+5. For a multi-person meeting, type `m` (leader) → *Pick attendees* view opens. Enter on each attendee toggles in/out of context; view stays open; ☑/☐ updates live; pinned rows float to the top. **Esc** returns to the view you were in when you pressed `m` (the picked attendees stay in sticky context).
 6. Shift-`C` clears the sticky context.
 
 ## Configuration

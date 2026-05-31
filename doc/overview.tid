@@ -10,7 +10,7 @@ A small ''workday + orga'' workflow layer on top of ''`rimir/cascade-palette`''.
 
 ! Mechanism vs workflow split
 
-* ''`rimir/cascade-palette`'' (mechanism). Ships the sticky-context state tiddler, the Context pill strip, the universal Pin / Unpin / Clear verbs, and the `<<sticky-context-list>>` / `<<sticky-context-count>>` variables exposed to every filter eval. Also ships the engine support that makes worga's views work: `ca-view-after-fire: stay` (0.0.96) and ambient `<<sticky-context-list>>` in every `_filterInScope` call (0.0.97) — without those, multiselect views and context-aware row-template filters silently fail.
+* ''`rimir/cascade-palette`'' (mechanism). Ships the sticky-context state tiddler, the Context pill strip, the universal Pin / Unpin / Clear verbs, and the `<<sticky-context-list>>` / `<<sticky-context-count>>` variables exposed to every filter eval. Also ships the engine support that makes worga's views work: `ca-view-after-fire: stay` (0.0.96), ambient `<<sticky-context-list>>` in every `_filterInScope` call (0.0.97), and the view-history back-stack so Esc out of `m`-driven or take-call-driven views returns to where you were (0.0.98) — without those, multiselect views and context-aware row-template filters silently fail and side-quest navigation feels like a dead end.
 * ''`rimir/worga`'' (workflow). Ships ''Take call from <person>'', ''Start meeting'' (`m` leader), a ''Pick attendees'' toggle-multiselect view, and a ''Topics for context'' worked example. None of these are required to use sticky context — they're patterns for assembling your own workflows.
 
 ! Shipped tiddlers
