@@ -1,0 +1,50 @@
+title: $:/plugins/rimir/worga/doc/overview
+tags: $:/tags/rimir/doc-template/section
+rdt.plugin-name: worga
+rdt.section-kind: overview
+rdt.section-title: Overview
+
+! What it is
+
+A small ''workday + orga'' workflow layer on top of ''`rimir/cascade-palette`''. Three shipped tiddlers + one worked-example view demonstrate how to wire pin-people / start-meeting flows into cp's [[sticky-context|$:/plugins/rimir/cascade-palette/help/sticky-context]] mechanism. The plugin is intentionally minimal — bring your own data model and adapt the filters.
+
+! Mechanism vs workflow split
+
+* ''`rimir/cascade-palette`'' (mechanism). Ships the sticky-context state tiddler, the Context pill strip, the universal Pin / Unpin / Clear verbs, and the `<<sticky-context-list>>` / `<<sticky-context-count>>` variables exposed to every filter eval. Also ships the engine support that makes worga's views work: `ca-view-after-fire: stay` (0.0.96) and ambient `<<sticky-context-list>>` in every `_filterInScope` call (0.0.97) — without those, multiselect views and context-aware row-template filters silently fail.
+* ''`rimir/worga`'' (workflow). Ships ''Take call from <person>'', ''Start meeting'' (`m` leader), a ''Pick attendees'' toggle-multiselect view, and a ''Topics for context'' worked example. None of these are required to use sticky context — they're patterns for assembling your own workflows.
+
+! Shipped tiddlers
+
+|!Tiddler |!What it does |!Field of interest |
+|`actions/take-call.tid` |Single-keystroke "I'm on a call with this person" — clears sticky context, pins the row, jumps to ''Topics for context'' view |`ca-after-fire: keep` keeps palette open; action chain is three messages: clear → pin → set-view |
+|`leaders/start-meeting.tid` |`m` leader — clears context, activates the ''Pick attendees'' view |Wired via `rimir-cascade-palette-set-view` so the pick view becomes active immediately |
+|`views/pick-attendees.tid` |Multiselect: Enter toggles each row in/out of sticky context. Pinned rows float to top, marked ☑ |`ca-view-after-fire: stay` (view-wide keep-open); `ca-view-row-icon` = ☑/☐ filter; `ca-view-sort-key` floats pinned to top; `ca-view-row-actions` uses inline-filter `{{{ ... }}}` on `$message` to dispatch pin-or-unpin from one widget |
+|`views/topics-for-context.tid` |Worked example of a context-aware view — narrows to topics whose stakeholders intersect with pinned tiddlers |`ca-view-context-aware: yes` + the `worga.any-pinned-stakeholder` `\function` (in `macros.tid`, tagged `$:/tags/Macro`, picked up by cp's startup `\import`) — uses `:intersection[enlist<sticky-context-list>]` for proper set-intersection (the `+[enlist<X>]` shape REPLACES not intersects: `+` makes source = prior results, but `enlist<X>` is source-emitting and ignores its source) |
+
+! The pick-attendees toggle pattern
+
+The 0.0.5+ shape demonstrates a reusable multiselect pattern. Three coordinated overrides:
+
+* ''Row icon'' (`ca-view-row-icon: [enlist<sticky-context-list>match<currentTiddler>then[☑]else[☐]]`) — pinned rows show ☑, unpinned show ☐. Re-evaluates on every stage recompute (which fires after every pin/unpin action) so the visual mirrors state live.
+* ''Sort key'' (`ca-view-sort: custom` + `ca-view-sort-key: [enlist<sticky-context-list>match<currentTiddler>then[0]else[1]addsuffix<currentTiddler>]`) — produces "0&lt;title&gt;" for pinned rows, "1&lt;title&gt;" for unpinned. localeCompare puts "0" before "1", so pinned float to the top; title is the alphabetic tiebreaker within each group.
+* ''Toggle action'' (`ca-view-row-actions: <$action-sendmessage $message={{{ ... }}} title=<<currentTiddler>>/>`) — single widget. The `$message` attribute is an inline filter that picks `rimir-cascade-palette-unpin-context` when the row is already pinned, `rimir-cascade-palette-pin-context` otherwise. Same `title` parameter for both messages so no branching needed outside `$message`.
+
+All three rely on cascade-palette 0.0.97's ambient `<<sticky-context-list>>` (the per-row template filters are evaluated via `_filterInScope` and need the variable in scope) AND on 0.0.96's `ca-view-after-fire: stay` (so the palette doesn't close between toggles).
+
+! Config tiddlers
+
+Three knobs let you adapt the shipped views to your data model without forking:
+
+* `$:/config/rimir/worga/topics-stakeholder-field` — field name read by ''Topics for context'' (default `stakeholders`). If your topics use `stakeholder` (singular), `assignee`, `owner`, etc., change it here.
+* `$:/config/rimir/worga/topics-roots-filter` — base "topics" filter (default `[all[tiddlers]has[stakeholders]]`). If you have a typed model, scope to it: e.g. `[all[tiddlers]field:kind.type[topic]]`.
+* `$:/config/rimir/worga/attendees-roots-filter` — base "persons" filter for ''Pick attendees'' (default unions kind-typed and tag-typed persons, both with `!is[system]` to keep kind's self-describing type-definition tiddlers out of the picker).
+
+! Adding your own workflow
+
+The pattern is:
+
+# Add an ''action tiddler'' tagged `$:/tags/rimir/cascade-palette/action` whose `ca-applies` matches the rows where the verb should appear, and whose `ca-actions` sends the right cp messages. Add `ca-after-fire: keep` if you want the palette to stay open after firing.
+# Add a ''leader'' tagged `$:/tags/rimir/cascade-palette/leader` with a single-char key and an action chain.
+# Add a ''view'' tagged `$:/tags/rimir/cascade-palette/view` that consumes `<<sticky-context-list>>` in its `ca-view-roots` / `ca-layer-children` filter AND declares `ca-view-context-aware: yes` so the badge appears. For multiselect-style views, also set `ca-view-after-fire: stay` and override `ca-view-row-icon` / `ca-view-sort-key` / `ca-view-row-actions` for the checkbox-style UX.
+
+That's it — the cp engine does the rest.

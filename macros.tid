@@ -1,0 +1,5 @@
+title: $:/plugins/rimir/worga/macros
+tags: $:/tags/Macro
+type: text/vnd.tiddlywiki
+
+\function worga.any-pinned-stakeholder(topic) [<topic>get{$:/config/rimir/worga/topics-stakeholder-field}enlist-input[]] :intersection[enlist<sticky-context-list>]

@@ -1,0 +1,10 @@
+title: $:/plugins/rimir/worga/actions/take-call
+tags: $:/tags/rimir/cascade-palette/action
+ca-name: Take call from this person
+ca-hint: Clear the sticky context, pin this person, and jump to "Topics for context" — single-keystroke entry into a call session.
+ca-icon: 📞
+ca-kind: leaf
+ca-order: 70
+ca-applies: [<currentTiddler>has[kind.type]get[kind.type]match[person]] [<currentTiddler>tag[Person]]
+ca-after-fire: keep
+ca-actions: <$action-sendmessage $message="rimir-cascade-palette-clear-context"/><$action-sendmessage $message="rimir-cascade-palette-pin-context" title=<<currentTiddler>>/><$action-sendmessage $message="rimir-cascade-palette-set-view" view="$:/plugins/rimir/worga/views/topics-for-context"/>

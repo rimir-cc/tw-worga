@@ -1,0 +1,3 @@
+title: $:/config/rimir/worga/attendees-roots-filter
+
+[all[tiddlers]field:kind.type[person]!is[system]] [all[tiddlers]tag[Person]!is[system]]

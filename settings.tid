@@ -1,0 +1,24 @@
+title: $:/plugins/rimir/worga/settings
+type: text/vnd.tiddlywiki
+
+! worga settings
+
+Two config tiddlers customise the shipped verbs and views without forking the plugin.
+
+! `$:/config/rimir/worga/topics-stakeholder-field`
+
+Field name read by ''Topics for context'' when deciding which topics involve a pinned person. Default `stakeholders`. Change to match your data model (e.g. `attendees`, `participants`, `team-member-of`).
+
+<$edit-text tiddler="$:/config/rimir/worga/topics-stakeholder-field" tag="input" default="stakeholders"/>
+
+! `$:/config/rimir/worga/topics-roots-filter`
+
+Override the base "topics" filter used by ''Topics for context''. Default `[all[tiddlers]has[stakeholders]]`. Change to match how your topics are tagged / typed (e.g. `[all[tiddlers]has[kind.type]get[kind.type]match[topic]]`).
+
+<$edit-text tiddler="$:/config/rimir/worga/topics-roots-filter" tag="input" default="[all[tiddlers]has[stakeholders]]"/>
+
+! `$:/config/rimir/worga/attendees-roots-filter`
+
+Source filter for the ''Pick attendees'' view (drilled into by the ''Start meeting'' leader). Default unions kind-typed persons and tag-typed persons so a non-kind user still has results.
+
+<$edit-text tiddler="$:/config/rimir/worga/attendees-roots-filter" tag="input" default="[all[tiddlers]has[kind.type]get[kind.type]match[person]] [all[tiddlers]tag[Person]]"/>

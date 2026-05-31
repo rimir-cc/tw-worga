@@ -1,0 +1,8 @@
+title: $:/plugins/rimir/worga/views/topics-for-context
+tags: $:/tags/rimir/cascade-palette/view
+ca-view-name: Topics for context
+ca-view-hint: Topics whose stakeholders field contains any pinned person. Narrows live as you pin / unpin.
+ca-view-context-aware: yes
+ca-view-roots: [subfilter{$:/config/rimir/worga/topics-roots-filter}] :filter[function[worga.any-pinned-stakeholder],<currentTiddler>]
+ca-view-sort: alphabetical
+ca-order: 510

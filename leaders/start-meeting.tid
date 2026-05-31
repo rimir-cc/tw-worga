@@ -1,0 +1,8 @@
+title: $:/plugins/rimir/worga/leaders/start-meeting
+tags: $:/tags/rimir/cascade-palette/leader
+ca-leader-key: m
+ca-leader-name: Start meeting
+ca-leader-hint: Clear sticky context then open a pick-attendees view (Enter on each attendee appends to context).
+ca-leader-help: Clears the current sticky context then activates the ''Pick attendees'' view. Enter on each row appends that person to the sticky context — the view stays open between picks (ca-view-after-fire: stay). Esc closes the pick view and leaves the populated context in place; switching to a context-aware view (e.g. ''Topics for context'') then narrows to topics involving any of the picked attendees.
+ca-leader-actions: <$action-sendmessage $message="rimir-cascade-palette-clear-context"/><$action-sendmessage $message="rimir-cascade-palette-set-view" view="$:/plugins/rimir/worga/views/pick-attendees"/>
+ca-order: 120
