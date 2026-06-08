@@ -4,7 +4,7 @@ ca-view-name: Pick attendees
 ca-view-hint: Enter toggles the row: pins if unpinned, unpins if already in sticky context. Pinned attendees float to the top, marked ☑.
 ca-view-roots: [subfilter{$:/config/rimir/worga/attendees-roots-filter}]
 ca-view-sort: custom
-ca-view-sort-key: [enlist<sticky-context-list>match<currentTiddler>then[0]else[1]addsuffix<currentTiddler>]
+ca-view-sort-key: [function[worga.attendee-sort-key],<currentTiddler>]
 ca-view-row-icon: [enlist<sticky-context-list>match<currentTiddler>then[☑]else[☐]]
 ca-view-after-fire: stay
 ca-view-row-actions: <$action-sendmessage $message={{{ [enlist<sticky-context-list>match<currentTiddler>then[rimir-cascade-palette-unpin-context]else[rimir-cascade-palette-pin-context]] }}} title=<<currentTiddler>>/>

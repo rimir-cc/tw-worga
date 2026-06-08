@@ -3,3 +3,5 @@ tags: $:/tags/Macro
 type: text/vnd.tiddlywiki
 
 \function worga.any-pinned-stakeholder(topic) [<topic>get{$:/config/rimir/worga/topics-stakeholder-field}enlist-input[]] :intersection[enlist<sticky-context-list>]
+
+\function worga.attendee-sort-key(row) [enlist<sticky-context-list>match<row>then[0]else[1]] :map[<row>get[caption]else<row>addprefix[ ]addprefix<currentTiddler>]
