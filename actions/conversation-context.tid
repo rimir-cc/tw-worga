@@ -1,0 +1,12 @@
+title: $:/plugins/rimir/worga/actions/conversation-context
+tags: $:/tags/rimir/cascade-palette/action
+ca-entity-type: kind-entity
+ca-applies: [<currentTiddler>has[kind.type]get[kind.type]match[conversation]]
+ca-name: In context of participants…
+ca-hint: Open work items and topics referencing this conversation's participants — projects/tasks/todos grouped by Waiting for / Assignee / Stakeholder, plus stakeholder topics. Newest-actionable first.
+ca-icon: 🧑‍🤝‍🧑
+ca-kind: drill
+ca-order: 40
+ca-next-title: In context of participants
+ca-next-entity-type: kind-entity
+ca-items-from: [function[worga.context-items],<parent-picked>]

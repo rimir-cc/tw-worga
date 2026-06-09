@@ -3,7 +3,7 @@
     "description": "Workday + orga workflows on top of cascade-palette — call / meeting / focus verbs and context-aware views",
     "name": "worga",
     "author": "rimir",
-    "version": "0.0.9",
+    "version": "0.0.10",
     "core-version": ">=5.4.0",
     "source": "https://github.com/rimir-cc/tw-worga",
     "plugin-type": "plugin",

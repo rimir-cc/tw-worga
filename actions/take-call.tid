@@ -1,10 +1,10 @@
 title: $:/plugins/rimir/worga/actions/take-call
 tags: $:/tags/rimir/cascade-palette/action
 ca-name: Take call from this person
-ca-hint: Clear the sticky context, pin this person, and jump to "Topics for context" — single-keystroke entry into a call session.
+ca-hint: Start a running Conversation parented to this person (planned-at now, this person as participant) and drill into it — palette stays on the new conversation, with this person's conversations as the pop-target.
 ca-icon: 📞
-ca-kind: leaf
 ca-order: 70
-ca-applies: [<currentTiddler>has[kind.type]get[kind.type]match[person]] [<currentTiddler>tag[Person]]
+ca-kind: leaf
 ca-after-fire: keep
-ca-actions: <$action-sendmessage $message="rimir-cascade-palette-clear-context"/><$action-sendmessage $message="rimir-cascade-palette-pin-context" title=<<currentTiddler>>/><$action-sendmessage $message="rimir-cascade-palette-set-view" view="$:/plugins/rimir/worga/views/topics-for-context"/>
+ca-applies: [<currentTiddler>has[kind.type]get[kind.type]match[person]] [<currentTiddler>tag[Person]]
+ca-actions: <$let person=<<currentTiddler>> kind-tid={{{ [function[kind.locate-type],[conversation]] }}} draft-tid="$:/state/rimir/worga/take-call/draft"><$action-setfield $tiddler=<<draft-tid>> parent=<<person>> participants=<<person>>/><$transclude $variable="kind.apply-defaults-to" type-tid=<<kind-tid>> target-tid=<<draft-tid>>/><$action-setfield $tiddler=<<draft-tid>> status="running" caption={{{ [<draft-tid>get[planned-at]format:date[0DD.0MM.YYYY 0hh:0mm]addprefix[Conversation at ]] }}}/><$transclude $variable="kind.finalize-create" kind-tid=<<kind-tid>> kind-type-key="conversation" draft-tid=<<draft-tid>> savetitle="$:/state/rimir/worga/take-call/result"/><$action-deletetiddler $tiddler=<<draft-tid>>/><$action-sendmessage $message="rimir-cascade-palette-drill-sequence" host=<<person>> items-from="[function[worga.call-conversations],<parent-picked>]" title="Conversations" entity-type="kind-entity" entity={{$:/state/rimir/worga/take-call/result}} entity-title={{{ [{$:/state/rimir/worga/take-call/result}get[caption]] }}} select={{$:/state/rimir/worga/take-call/result}}/></$let>

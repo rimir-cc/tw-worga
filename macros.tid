@@ -5,3 +5,66 @@ type: text/vnd.tiddlywiki
 \function worga.any-pinned-stakeholder(topic) [<topic>get{$:/config/rimir/worga/topics-stakeholder-field}enlist-input[]] :intersection[enlist<sticky-context-list>]
 
 \function worga.attendee-sort-key(row) [enlist<sticky-context-list>match<row>then[0]else[1]] :map[<row>get[caption]else<row>addprefix[ ]addprefix<currentTiddler>]
+
+<!-- Conversation rows referencing a person, for the take-call drill-sequence
+     landing. Reuses kind's reverse-nav row builder for the conversation×participants
+     relation, so the rows carry status grouping + the real title (action menu). -->
+\function worga.call-conversations(person) [function[kind.locate-type],[conversation]] +[first[]] :map:flat[function[kind.instance-rows-for-pair],<person>,<currentTiddler>,[participants]]
+
+<!-- In-context-of-conversation drill: from a conversation, surface the open
+     work items and topics that reference its participants. Two-hop reverse-ref
+     (conversation -> participants -> referencing instances), grouped by role.
+     Reuses kind's referencing-instances + instance-row-json so there's no
+     duplication of the reverse-ref / row-building logic. -->
+
+<!-- Participants are persons or teams; expand each team to its member persons
+     (the role fields below only ever reference persons). -->
+\function worga.expand-participant(p) [<p>get[kind.type]match[team]] :map:flat[<p>get[members]enlist-input[]] ~[<p>]
+\function worga.conv-persons(conv) [<conv>get[participants]enlist-input[]] :map:flat[function[worga.expand-participant],<currentTiddler>] +[unique[]]
+
+<!-- Open = not archived and not completed (project/task/todo express "done"
+     via completed-date; topics only have active/archived). -->
+\function worga.is-open(inst) [<inst>!has[completed-date]] :filter[<currentTiddler>get[status]!match[archived]]
+
+<!-- Effective date for within-group ordering (date fields store YYYYMMDD,
+     so a lexical sort is chronological); fall back to modified for topics. -->
+\function worga.ctx-date(inst) [<inst>get[due-date]!is[blank]] ~[<inst>get[follow-up-date]!is[blank]] ~[<inst>get[start-date]!is[blank]] ~[<inst>get[modified]!is[blank]] ~[<inst>]
+
+\function worga.person-role-instances(person, field, kinds-csv) [enlist<kinds-csv>] :map:flat[function[kind.locate-type],<currentTiddler>] :map:flat[function[kind.referencing-instances],<person>,<currentTiddler>,<field>]
+\function worga.role-instances(conv, field, kinds-csv) [function[worga.conv-persons],<conv>] :map:flat[function[worga.person-role-instances],<currentTiddler>,<field>,<kinds-csv>] :filter[function[worga.is-open],<currentTiddler>] +[unique[]]
+
+\function worga.ctx-row-json(inst, label) [function[kind.resolve-ref],<inst>] ~[<inst>] :map[function[kind.instance-row-json],<inst>,<label>,<currentTiddler>]
+\function worga.role-rows(conv, field, label, kinds-csv) [function[worga.role-instances],<conv>,<field>,<kinds-csv>] :map[function[worga.ctx-date],<currentTiddler>addsuffix[@@]addsuffix<currentTiddler>] +[sort[]] :map[<currentTiddler>split[@@]last[]] :map[function[worga.ctx-row-json],<currentTiddler>,<label>]
+
+<!-- Create-in-context rows: one bind-less `ca-kind:text` row per creatable
+     kind. The user types a caption; ca-on-commit fires worga.create-in-context
+     with <<picked>> (the caption) and <<parent-picked>> (the conversation).
+     Label + icon come from the kind def; threaded through -2/-3 because a
+     \function can't interpolate a computed value into an addsuffix operand.
+     The on-commit wikitext contains no [ ] so it needs no _brackets dance,
+     only \" to escape the JSON-internal quotes. -->
+\function worga.ctx-create-label(kind-key) [function[kind.locate-type],<kind-key>get[kind.caption]] ~[<kind-key>] +[addprefix[New ]]
+\function worga.ctx-create-icon(kind-key) [function[kind.locate-type],<kind-key>get[kind.icon]] ~[[➕]]
+\function worga.ctx-create-row(kind-key) [function[worga.ctx-create-label],<kind-key>] :map[function[worga.ctx-create-row-2],<kind-key>,<currentTiddler>]
+\function worga.ctx-create-row-2(kind-key, label) [function[worga.ctx-create-icon],<kind-key>] :map[function[worga.ctx-create-row-3],<kind-key>,<label>,<currentTiddler>]
+\function worga.ctx-create-row-3(kind-key, label, icon) [<label>] +[addprefix[{"ca-name":"]] +[addsuffix[…","ca-icon":"]] +[addsuffix<icon>] +[addsuffix[","ca-group":"Create","ca-hint":"Type a caption and ↵ — parent = this conversation, stakeholders = its participants.","ca-kind":"text","ca-on-commit":"<$transclude $variable=\"worga.create-in-context\" conv=<<parent-picked>> kind-key=\"]] +[addsuffix<kind-key>] +[addsuffix[\" caption=<<picked>>/>"}]]
+
+<!-- Role-major emission: reorderByGroup keeps first-appearance group order and
+     stable within-group order, so the runs become clusters in this sequence,
+     each already date-sorted. The Create cluster trails the listings. -->
+\function worga.context-items(conv) [function[worga.role-rows],<conv>,[waiting-for],[Waiting for],[project task todo]] [function[worga.role-rows],<conv>,[assignee],[Assignee],[project task todo]] [function[worga.role-rows],<conv>,[stakeholder],[Stakeholder],[project task todo]] [function[worga.role-rows],<conv>,[stakeholder],[Topics],[topic]] [function[worga.ctx-create-row],[project]] [function[worga.ctx-create-row],[task]] [function[worga.ctx-create-row],[todo]] [function[worga.ctx-create-row],[topic]]
+
+<!-- Create a new instance of <<kind-key>> parented to the conversation, with
+     the conversation's participants (teams expanded to member persons, since
+     stakeholder only ref-types person) as stakeholders and the typed caption.
+     Defaults fill the rest; finalize-create derives the title from the kind's
+     title-formula. apply-defaults is idempotent so the pre-set fields survive.
+     The drill recomputes after commit, so the new item appears in its group. -->
+\procedure worga.create-in-context(conv, kind-key, caption)
+<$let kind-tid={{{ [function[kind.locate-type],<kind-key>] }}} draft-tid="$:/state/rimir/worga/ctx-create/draft">
+<$action-setfield $tiddler=<<draft-tid>> parent=<<conv>> caption=<<caption>> stakeholder={{{ [function[worga.conv-persons],<conv>] +[join[ ]] }}}/>
+<$transclude $variable="kind.apply-defaults-to" type-tid=<<kind-tid>> target-tid=<<draft-tid>>/>
+<$transclude $variable="kind.finalize-create" kind-tid=<<kind-tid>> kind-type-key=<<kind-key>> draft-tid=<<draft-tid>> savetitle="$:/state/rimir/worga/ctx-create/result"/>
+<$action-deletetiddler $tiddler=<<draft-tid>>/>
+</$let>
+\end
