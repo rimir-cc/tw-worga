@@ -45,7 +45,7 @@ type: text/vnd.tiddlywiki
      only \" to escape the JSON-internal quotes. -->
 \function worga.ctx-create-label(kind-key) [function[kind.locate-type],<kind-key>get[kind.caption]] ~[<kind-key>] +[addprefix[New ]]
 \function worga.ctx-create-icon(kind-key) [function[kind.locate-type],<kind-key>get[kind.icon]] ~[[➕]]
-\function worga.ctx-create-row(kind-key) [function[worga.ctx-create-label],<kind-key>] :map[function[worga.ctx-create-row-2],<kind-key>,<currentTiddler>]
+\function worga.ctx-create-row(kind-key) [function[worga.ctx-create-label],<kind-key>] :map[function[kind.json-escape],<currentTiddler>] :map[function[worga.ctx-create-row-2],<kind-key>,<currentTiddler>]
 \function worga.ctx-create-row-2(kind-key, label) [function[worga.ctx-create-icon],<kind-key>] :map[function[worga.ctx-create-row-3],<kind-key>,<label>,<currentTiddler>]
 \function worga.ctx-create-row-3(kind-key, label, icon) [<label>] +[addprefix[{"ca-name":"]] +[addsuffix[…","ca-icon":"]] +[addsuffix<icon>] +[addsuffix[","ca-group":"Create","ca-hint":"Type a caption and ↵ — parent = this conversation, stakeholders = its participants.","ca-kind":"text","ca-on-commit":"<$transclude $variable=\"worga.create-in-context\" conv=<<parent-picked>> kind-key=\"]] +[addsuffix<kind-key>] +[addsuffix[\" caption=<<picked>>/>"}]]
 
